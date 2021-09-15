@@ -12,7 +12,7 @@ export class TimeTableService {
   @Inject() private eventEmitter: EventEmitterService;
 
   async find(id: string): Promise<TimeTable | null> {
-    const topic = await this.timetable.findById(id).exec();
+    const topic = await this.timetable.findById(id).populate("lesson").exec();
     return topic;
   }
 

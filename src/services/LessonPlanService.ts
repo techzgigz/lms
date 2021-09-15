@@ -11,7 +11,7 @@ export class LessonPlanService {
   @Inject() private eventEmitter: EventEmitterService;
 
   async find(id: string): Promise<LessonPlan | null> {
-    const LessonPlan = await this.LessonPlan.findById(id).exec();
+    const LessonPlan = await this.LessonPlan.findById(id).populate("topic").exec();
     return LessonPlan;
   }
 

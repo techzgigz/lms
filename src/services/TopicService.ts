@@ -11,7 +11,7 @@ export class TopicService {
   @Inject() private eventEmitter: EventEmitterService;
 
   async find(id: string): Promise<Topic | null> {
-    const topic = await this.Topic.findById(id).exec();
+    const topic = await this.Topic.findById(id).populate("lesson").populate("school").exec();
     return topic;
   }
 

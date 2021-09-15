@@ -57,7 +57,7 @@ export class LessonController {
   ): Promise<Lesson | null> {
     if (
       (request.user as any).role !== "superadmin" &&
-      !request.permissions.readIds.includes(id)
+      !request.permissions?.readIds.includes(id)
     ) {
       throw new Error("You don't have sufficient permissions");
     }
