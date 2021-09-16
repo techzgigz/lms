@@ -57,7 +57,7 @@ import {
     ): Promise<Content | null> {
       if (
         (request.user as any).role !== "superadmin" &&
-        !request.permissions?.readIds.includes(id)
+        !request.permissions.readIds.includes(id)
       ) {
         throw new Error("You don't have sufficient permissions");
       }
@@ -78,7 +78,7 @@ import {
       @Groups("creation")
       data: Content
     ): Promise<Content> {
-     // console.log(request.file?.filename)
+     // console.log(request.file.filename)
       const user = await this.usersService.find(data.createdBy.toString());
       if (!user) {
         throw new Error(
@@ -87,7 +87,8 @@ import {
       }
   
       let dataTemp : any =data;
-      dataTemp.file= request && request.file && request.file.filename;
+      //console.log(request.files)
+      dataTemp.file= request && request.files && request.files;
       return this.contentService.save(dataTemp, {
         role: (request.user as any).role, 
         _id: (request.user as any)._id,

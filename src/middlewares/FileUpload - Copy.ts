@@ -27,26 +27,20 @@ const storage = multer.diskStorage({
     },
 
     filename: function (req: any, file: any, cb: any) {
-        const ext = file.mimetype.split("/")[1];
-        //var Po= `${file.fieldname}-${Date.now()}.${ext}`
-        //cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-        cb(null,  `${file.originalname}-${+Date.now()}`)//file.originalname)
+        cb(null, file.originalname + "_"+ new Date() )
     }
 });
 const fileFilter = (req: any, file: any, cb: any) => {
-    // if (file.mimetype === "image/jpg" ||
-    //     file.mimetype === "image/jpeg" ||
-    //     file.mimetype === "image/png" || file.mimetype === "application/pdf" || file.mimetype === "application/docs" ) {
-    if ( file) {
+    if (file.mimetype === "image/jpg" ||
+        file.mimetype === "image/jpeg" ||
+        file.mimetype === "image/png") {
+
         cb(null, true);
     } else {
         cb(new Error("Image uploaded is not of type jpg/jpeg or png"), false);
     }
 }
-const upload = multer({ storage: storage, fileFilter: fileFilter,limits:{
-    files:2,
-    fileSize: 1024 * 1024 * 2
-} }).array('file',2);
+const upload = multer({ storage: storage, fileFilter: fileFilter }).single('file');
 
 
 async function multerPromis( req: any, res:any) {
@@ -62,11 +56,11 @@ async function multerPromis( req: any, res:any) {
 
 export async function UploadMiddleware( request: Req, res: Res, next: Next) {
     try {
-        console.log(request.files)
+        //console.log(request.files)
         await multerPromis(request,res);
         next()
     } catch (error) {
         console.log(error)
-        res.status(404).send(error)
+        res.send(404);
     }
 }
