@@ -14,18 +14,28 @@ import {
   Groups,
   Required,
   Returns,
+  Security,
   Status,
   Summary,
 } from "@tsed/schema";
 import { AcceptRoles } from "src/decorators/AcceptRoles";
 import { Section } from "src/models/sections/Section";
+import { GradesService } from "src/services/GradesService";
+import { MediumsService } from "src/services/MediumsService";
 import { SectionsService } from "src/services/SectionsService";
+import { UsersService } from "src/services/UsersService";
 
 @Controller("/sections")
 export class SectionsController {
-  constructor(private sectionsService: SectionsService) {}
+  constructor(
+    private sectionsService: SectionsService,
+    private gradesService: GradesService,
+    private mediumsService: MediumsService,
+    private usersService: UsersService
+  ) {}
 
   @Get("/")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return all Sections")
@@ -39,6 +49,7 @@ export class SectionsController {
   }
 
   @Get("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return Section based on id")
@@ -57,6 +68,7 @@ export class SectionsController {
   }
 
   @Post("/")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Create new Section")
@@ -68,29 +80,42 @@ export class SectionsController {
     @Groups("creation")
     data: Section
   ): Promise<Section> {
-    if (request.user) {
-      data = { ...data, createdBy: (request.user as any)._id };
+    const user = await this.usersService.find(data.createdBy.toString());
+    if (!user || user.role === "superadmin") {
+      throw new Error(
+        `User with id: ${data.createdBy} doesn't exist or is superadmin, use other role.`
+      );
+    }
+    const grade = await this.gradesService.find(data.grade.toString());
+    if (!grade) {
+      throw new Error(`Grade with id: ${data.grade} doesn't exist`);
+    }
+    const medium = await this.mediumsService.find(data.medium.toString());
+    if (!medium) {
+      throw new Error(`Medium with id: ${data.medium} doesn't exist`);
     }
     return this.sectionsService.save(data, {
-      role: (request.user as any).role,
-      _id: (request.user as any)._id,
-      adminId: (request.user as any).adminId,
+      role: user.role,
+      _id: user._id,
+      adminId: user.adminId,
     });
   }
 
   @Put("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Update Section with id")
   @Status(201, { description: "Updated Section", type: Section })
   update(
     @PathParams("id") @Required() id: string,
-    @BodyParams() @Required() @Groups('updation') Section: Section
+    @BodyParams() @Groups("updation") @Required() Section: Section
   ): Promise<Section | null> {
     return this.sectionsService.update(id, Section);
   }
 
   @Delete("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Remove a Section")

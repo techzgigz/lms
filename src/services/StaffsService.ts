@@ -16,27 +16,23 @@ export class StaffsService {
   }
 
   async save(data: Staff, user: EntityCreationUser): Promise<Staff> {
-    const Staff = new this.staff(data);
-    await Staff.save();
+    const staff = new this.staff(data);
+    await staff.save();
     this.eventEmitter.emit("entity.created", {
       user,
       moduleName: "Staff",
     });
-    return Staff;
+    return staff;
   }
 
   async update(id: string, data: Staff): Promise<Staff | null> {
-    const Staff = await this.staff.findById(id).exec();
-    // if (Staff) {
-    //   Staff.student = data.student;
-    //   Staff.grade = data.grade;
-    //   Staff.section = data.section;
-    //   Staff.text = data.text;
-    //   Staff.date = data.date;
-    //   Staff.status = data.status;
-    //   await Staff.save();
-    // }
-    return Staff;
+    const staff = await this.staff.findById(id).exec();
+    if (staff) {
+      staff.status = data.status;
+      await staff.save();
+      return staff;
+    }
+    return null;
   }
 
   async query(options = {}): Promise<Staff[]> {

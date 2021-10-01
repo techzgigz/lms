@@ -1,4 +1,4 @@
-import { Model, ObjectID, Ref, Trim } from "@tsed/mongoose";
+import { Model, ObjectID, Ref, Trim, Unique } from "@tsed/mongoose";
 import {
   CollectionOf,
   Default,
@@ -11,6 +11,7 @@ import {
 } from "@tsed/schema";
 import { Course } from "../courses/Course";
 import { Section } from "../sections/Section";
+import { Subject } from "../subjects/Subject";
 import { User } from "../users/User";
 
 @Model({ schemaOptions: { timestamps: true } })
@@ -19,26 +20,32 @@ export class Grade {
   @ObjectID("id")
   _id: string;
 
-  @Property()
+  @Unique()
   @Required()
-  @MinLength(3)
+  @MinLength(1)
   @MaxLength(50)
   @Trim()
   name: string;
 
-  @Ref(Course)
+  @Ref(() => Course)
   @Required()
-  courseId: Ref<Course>;
+  course: Ref<Course>;
 
+  @Groups("!creation")
   @Ref(() => Section)
   @CollectionOf(() => Section)
-  sectionIds: Ref<Section>[];
+  sections?: Ref<Section>[];
 
-  @Property()
+  @Groups("!creation")
+  @Ref(() => Subject)
+  @CollectionOf(() => Subject)
+  subjects?: Ref<Subject>[];
+
   @Enum("active", "inactive")
   @Default("active")
   status: string;
 
   @Ref(User)
+  @Groups("!updation")
   createdBy: Ref<User>;
 }

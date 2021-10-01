@@ -16,6 +16,7 @@ import {
   Summary,
   Groups,
   Status,
+  Security,
 } from "@tsed/schema";
 import { AcceptRoles } from "src/decorators/AcceptRoles";
 import { Permission } from "src/models/users/Permission";
@@ -26,6 +27,7 @@ export class PermissionsController {
   constructor(private permissionsService: PermissionsService) {}
 
   @Get("/")
+  @Security('oauth_jwt')
   @Authorize("jwt")
   @AcceptRoles("superadmin")
   @Summary("Return all permissions")
@@ -39,6 +41,7 @@ export class PermissionsController {
   }
 
   @Get("/:id")
+  @Security('oauth_jwt')
   @Authorize("jwt")
   @AcceptRoles("superadmin")
   @Summary("Return permission based on id")
@@ -57,6 +60,7 @@ export class PermissionsController {
   }
 
   @Post("/")
+  @Security('oauth_jwt')
   @Authorize("jwt")
   @AcceptRoles("superadmin")
   @Summary("Create new permission")
@@ -75,18 +79,20 @@ export class PermissionsController {
   }
 
   @Put("/:id")
+  @Security('oauth_jwt')
   @Authorize("jwt")
   @AcceptRoles("superadmin")
   @Summary("Update permission with id")
   @Status(201, { description: "Updated permission", type: Permission })
   update(
     @PathParams("id") @Required() id: string,
-    @BodyParams() @Required() permission: Permission
+    @BodyParams() @Groups("updation") @Required() permission: Permission
   ): Promise<Permission | null> {
     return this.permissionsService.update(id, permission);
   }
 
   @Delete("/:id")
+  @Security('oauth_jwt')
   @Authorize("jwt")
   @AcceptRoles("superadmin")
   @Summary("Remove a permission")

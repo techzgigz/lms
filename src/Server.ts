@@ -6,6 +6,7 @@ import bodyParser from "body-parser";
 import compress from "compression";
 import cookieParser from "cookie-parser";
 import methodOverride from "method-override";
+import session from "express-session";
 import cors from "cors";
 import "@tsed/ajv";
 import "@tsed/swagger";
@@ -14,6 +15,38 @@ import "@tsed/event-emitter"; // import event emitter ts.ed module
 import { config, rootDir } from "./config";
 import { IndexCtrl } from "./controllers/pages/IndexController";
 import { User } from "./models/users/User";
+import AdminBro from "admin-bro";
+import AdminBroExpress from "@admin-bro/express";
+import multer from "multer";
+
+const adminBro = new AdminBro({
+  databases: [],
+  rootPath: "/admin",
+});
+
+const router = AdminBroExpress.buildRouter(adminBro);
+
+// const fileFilter = (_, file, cb) => {
+//   if (
+//     file.mimetype.includes("png") ||
+//     file.mimetype.includes("jpeg") ||
+//     file.mimetype.includes("docx") ||
+//     file.mimetype.includes("pdf")
+//   ) {
+//     cb(null, true);
+//   } else {
+//     cb("Valid file types to upload: png, jpeg, docx, pdf", false);
+//   }
+// };
+
+const storage = multer.diskStorage({
+  destination: function (_, file, cb) {
+    cb(null, `${rootDir}/../uploads`);
+  },
+  filename: function (_, file, cb) {
+    cb(null, new Date().getTime() + "_" + file.originalname);
+  },
+});
 
 @Configuration({
   ...config,
@@ -36,6 +69,18 @@ import { User } from "./models/users/User";
     {
       path: "/v3/docs",
       specVersion: "3.0.1",
+      spec: {
+        components: {
+          securitySchemes: {
+            oauth_jwt: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+              description: "Bearer Token",
+            },
+          },
+        },
+      },
     },
   ],
   views: {
@@ -50,6 +95,10 @@ import { User } from "./models/users/User";
     enabled: true, // Enable events for this instance.
     // pass any options that you would normally pass to new EventEmitter2(), e.g.
     wildcard: true,
+  },
+  multer: {
+    dest: `${rootDir}/../uploads`,
+    storage,
   },
 })
 export class Server {
@@ -70,6 +119,18 @@ export class Server {
         bodyParser.urlencoded({
           extended: true,
         })
-      ); // @ts-ignore
+      )
+      .use(
+        session({
+          secret: process.env.SESSION_SECRET || "secret session",
+          resave: false,
+          saveUninitialized: true,
+          cookie: {
+            secure: true,
+            maxAge: 24 * 60 * 60 * 1000,
+          },
+        })
+      )
+      .use(adminBro.options.rootPath, router);
   }
 }

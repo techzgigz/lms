@@ -14,18 +14,26 @@ import {
   Groups,
   Required,
   Returns,
+  Security,
   Status,
   Summary,
 } from "@tsed/schema";
 import { AcceptRoles } from "src/decorators/AcceptRoles";
 import { Grade } from "src/models/grades/Grades";
+import { CoursesService } from "src/services/CoursesService";
 import { GradesService } from "src/services/GradesService";
+import { UsersService } from "src/services/UsersService";
 
 @Controller("/grades")
 export class GradesController {
-  constructor(private classesService: GradesService) {}
+  constructor(
+    private gradesService: GradesService,
+    private coursesService: CoursesService,
+    private usersService: UsersService
+  ) {}
 
   @Get("/")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return all Grades")
@@ -35,10 +43,11 @@ export class GradesController {
     if ((request.user as any).role !== "superadmin") {
       query = { _id: request.permissions?.readIds };
     }
-    return this.classesService.query(query);
+    return this.gradesService.query(query);
   }
 
   @Get("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return Grade based on id")
@@ -53,49 +62,60 @@ export class GradesController {
     ) {
       throw new Error("You don't have sufficient permissions");
     }
-    return this.classesService.find(id);
+    return this.gradesService.find(id);
   }
 
   @Post("/")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Create new Grade")
   @Returns(201, Grade)
   async createGrade(
     @Req() request: Req,
+    @Required()
     @Description("Grade model")
-    @BodyParams()
+    @BodyParams("grade")
     @Groups("creation")
-    data: Grade
+    grade: Grade
   ): Promise<Grade> {
-    if (request.user) {
-      data = { ...data, createdBy: (request.user as any)._id };
+    const user = await this.usersService.find(grade.createdBy.toString());
+    if (!user || user.role === "superadmin") {
+      throw new Error(
+        `User with id: ${grade.createdBy} doesn't exist or is superadmin, use other role.`
+      );
     }
-    return this.classesService.save(data, {
-      role: (request.user as any).role,
-      _id: (request.user as any)._id,
-      adminId: (request.user as any).adminId,
+    const course = await this.coursesService.find(grade.course.toString());
+    if (!course) {
+      throw new Error(`This course doesn't exist`);
+    }
+    return this.gradesService.save(grade, {
+      role: user.role,
+      _id: user._id,
+      adminId: user.adminId,
     });
   }
 
   @Put("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Update Grade with id")
   @Status(201, { description: "Updated Grade", type: Grade })
   update(
     @PathParams("id") @Required() id: string,
-    @BodyParams() @Required() @Groups('updation') Grade: Grade
+    @BodyParams() @Groups("updation") @Required() Grade: Grade
   ): Promise<Grade | null> {
-    return this.classesService.update(id, Grade);
+    return this.gradesService.update(id, Grade);
   }
 
   @Delete("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Remove a Grade")
   @Status(204, { description: "No content" })
   async remove(@PathParams("id") id: string): Promise<void> {
-    await this.classesService.remove(id);
+    await this.gradesService.remove(id);
   }
 }

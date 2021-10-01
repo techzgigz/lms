@@ -14,18 +14,24 @@ import {
   Groups,
   Required,
   Returns,
+  Security,
   Status,
   Summary,
 } from "@tsed/schema";
 import { AcceptRoles } from "src/decorators/AcceptRoles";
 import { Fee } from "src/models/fees/Fee";
 import { FeesService } from "src/services/FeesService";
+import { UsersService } from "src/services/UsersService";
 
 @Controller("/fees")
 export class FeesController {
-  constructor(private feesService: FeesService) {}
+  constructor(
+    private feesService: FeesService,
+    private usersService: UsersService
+  ) {}
 
   @Get("/")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return all Fees")
@@ -39,6 +45,7 @@ export class FeesController {
   }
 
   @Get("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return Fee based on id")
@@ -57,6 +64,7 @@ export class FeesController {
   }
 
   @Post("/")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Create new Fee")
@@ -68,29 +76,34 @@ export class FeesController {
     @Groups("creation")
     data: Fee
   ): Promise<Fee> {
-    if (request.user) {
-      data = { ...data, createdBy: (request.user as any)._id };
+    const user = await this.usersService.find(data.createdBy.toString());
+    if (!user || user.role === "superadmin") {
+      throw new Error(
+        `User with id: ${data.createdBy} doesn't exist or is superadmin, use other role.`
+      );
     }
     return this.feesService.save(data, {
-      role: (request.user as any).role,
-      _id: (request.user as any)._id,
-      adminId: (request.user as any).adminId,
+      role: user.role,
+      _id: user._id,
+      adminId: user.adminId,
     });
   }
 
   @Put("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Update Fee with id")
   @Status(201, { description: "Updated Fee", type: Fee })
   update(
     @PathParams("id") @Required() id: string,
-    @BodyParams() @Required() @Groups('updation') Fee: Fee
+    @BodyParams() @Groups("updation") @Required() Fee: Fee
   ): Promise<Fee | null> {
     return this.feesService.update(id, Fee);
   }
 
   @Delete("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Remove a Fee")

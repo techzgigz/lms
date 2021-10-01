@@ -11,13 +11,16 @@ import {
   Default,
   Email,
   Enum,
+  Example,
   Format,
   Groups,
   MaxLength,
   MinLength,
+  Nullable,
   Optional,
   Pattern,
   Required,
+  RequiredGroups,
 } from "@tsed/schema";
 import { argon2i } from "argon2-ffi";
 import crypto from "crypto";
@@ -25,26 +28,17 @@ import util from "util";
 import { Address } from "./Address";
 import { Role } from "./Role";
 import { SocialMediaAccount } from "./SocialMediaAccount";
+import { StaffRoles } from "./Staff";
 
 const getRandomBytes = util.promisify(crypto.randomBytes);
 
 enum Roles {
   SUPERADMIN = "superadmin",
   ADMIN = "admin",
-  TEACHER = "teacher",
   STUDENT = "student",
+  STAFF = "staff",
 }
 
-// @Groups<User>({
-//   // will generate UserCreate
-//   create: ["username", "email", "password", "role", "isActive", "isVerified"],
-//   read: ["username", "email", "password", "role", "isActive", "isVerified"],
-//   // will generate UserUpdate
-//   update: ["_id", "username", "email", "role", "isActive", "isVerified"],
-//   // will generate UserChangePassword
-//   changePassword: ["_id", "password"],
-//   login: ["email", "password"],
-// })
 @Model({ schemaOptions: { timestamps: true } })
 @PreHook("save", async (user: User, next: any) => {
   const salt = await getRandomBytes(32);
@@ -55,7 +49,7 @@ enum Roles {
   next();
 })
 export class User {
-  @Groups("!creation", "!updation")
+  @Groups("!creation", "!staffCreation", "!updation")
   @ObjectID("id")
   _id: string;
 
@@ -69,69 +63,70 @@ export class User {
   @Email()
   @Unique()
   @Trim()
+  @Example("superadmin@example.com")
   email: string;
 
-  @Optional()
-  @Required()
-  @Pattern(/^[6-9]\d{9}$/)
-  phoneNumber: number;
+  @Groups("!creation", "!staffCreation")
+  @Pattern(/^[6-9]{1}[0-9]{9}$/)
+  @Example(9899999999)
+  phoneNumber?: number;
 
-  @Optional()
+  @Nullable(Date)
   @Format("date")
-  @Required()
-  dateOfBirth: Date;
+  @Groups("!creation", "!staffCreation")
+  dateOfBirth?: Date | null;
 
-  @Optional()
-  currentAddress: Address;
+  @Groups("!creation", "!staffCreation")
+  currentAddress?: Address;
 
-  @Optional()
-  permanentAddress: Address;
+  @Groups("!creation", "!staffCreation")
+  permanentAddress?: Address;
 
   @Required()
   @MinLength(4)
-  @MaxLength(20)
-  @Groups("creation")
+  @Example("password")
+  @RequiredGroups("!patch")
   password: string;
 
   @Enum(Roles)
   @Default("admin")
   role: string;
 
-  @Optional()
   @Ref(Role)
-  roleId: Ref<Role>;
+  @Groups("!creation", "!staffCreation", "!updation")
+  roleId?: Ref<Role>;
 
-  @Optional()
+  @Groups("updation")
   @Default(true)
   isActive?: boolean;
 
-  @Optional()
+  @Groups("updation")
   @Default(true)
   isVerified: boolean;
 
-  @Optional()
-  fatherName: string;
+  @Groups("!creation", "!staffCreation")
+  fatherName?: string;
 
-  @Optional()
-  motherName: string;
+  @Groups("!creation", "!staffCreation")
+  motherName?: string;
 
-  @Optional()
-  socialMediaAccount: SocialMediaAccount;
+  @Groups("!creation", "!staffCreation")
+  socialMediaAccount?: SocialMediaAccount;
 
-  @Optional()
-  photo: string;
+  @Groups("!creation", "!staffCreation")
+  photo?: string;
 
+  @Groups("!creation", "!staffCreation")
   @Enum("male", "female")
-  @Optional()
   @Default("male")
-  gender: string;
+  gender?: string;
 
   @Ref(() => User)
-  @Groups("!creation", "!updation")
+  @Groups("!creation", "!staffCreation", "!updation")
   createdBy: Ref<User>;
 
   @Ref(() => User)
-  @Groups("!updation")
+  @Groups("!creation", "!updation")
   adminId: Ref<User>;
 
   token: string;

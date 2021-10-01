@@ -1,8 +1,19 @@
-import { Model, Ref, Schema } from "@tsed/mongoose";
-import { Default, Enum, Format, Required } from "@tsed/schema";
+import { Model, ObjectID, Ref, Schema } from "@tsed/mongoose";
+import {
+  Default,
+  Enum,
+  Format,
+  Groups,
+  Integer,
+  Max,
+  Min,
+  Pattern,
+  Property,
+  Required,
+} from "@tsed/schema";
 import { User } from "./User";
 
-enum StaffRoles {
+export enum StaffRoles {
   ACCOUNTANT = "accountant",
   TEACHER = "teacher",
   LIBRARIAN = "librarian",
@@ -22,10 +33,11 @@ enum ContractType {
 @Schema()
 class BankDetails {
   @Required()
+  @Integer()
   accountNumber: number;
 
   @Required()
-  ifscCode: number;
+  ifscCode: string;
 
   @Required()
   name: string;
@@ -36,9 +48,12 @@ class BankDetails {
 
 @Model({ schemaOptions: { timestamps: true } })
 export class Staff {
+  @Groups("!creation", "!updation")
+  @ObjectID("id")
+  _id: string;
+
   @Ref(User)
-  @Required()
-  user: Ref<User>;
+  user?: Ref<User>;
 
   @Enum(StaffRoles)
   @Required()
@@ -58,16 +73,20 @@ export class Staff {
   @Required()
   maritalStatus: string;
 
-  @Required()
   qualifications: string[];
 
   @Required()
+  @Max(50)
+  @Min(0)
+  @Integer()
   workExperience: number;
 
   @Required()
   epfNo: number;
 
   @Required()
+  @Integer()
+  @Min(0)
   basicSalary: number;
 
   @Required()
@@ -80,14 +99,14 @@ export class Staff {
   @Required()
   workShift: string;
 
-  @Required()
-  resume: string;
+  @Property()
+  resume?: string;
 
-  @Required()
-  joiningLetter: string;
+  @Property()
+  joiningLetter?: string;
 
-  @Required()
-  otherDocuments: string[];
+  @Property()
+  otherDocuments?: string[];
 
   @Enum("active", "inactive", "suspended")
   @Default("active")

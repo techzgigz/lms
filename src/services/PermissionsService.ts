@@ -1,5 +1,5 @@
 import { Service, Inject } from "@tsed/common";
-import { OnEvent } from "@tsed/event-emitter";
+import { EventEmitterService, OnEvent } from "@tsed/event-emitter";
 import { MongooseModel } from "@tsed/mongoose";
 import { uniq } from "lodash";
 import { Permission } from "src/models/users/Permission";
@@ -13,17 +13,14 @@ export type EntityCreationUser = {
 };
 interface UserCreated {
   user: EntityCreationUser;
-  moduleName: "User" | "School" | "Grade";
+  moduleName: string;
 }
 @Service()
 export class PermissionsService {
   @Inject(Permission) private permission: MongooseModel<Permission>;
 
-  @OnEvent("entity.created", {
-    /* optional: add any option you would normally pass to emitter.on("order.shipped", options) */
-  })
+  @OnEvent("entity.created", {})
   async addPermissionsToUser(event: UserCreated) {
-    console.log(event.user.role);
     if (!["superadmin"].includes(event.user.role)) {
       // create own permissions
       const pm = await this.findOrInitialize({
@@ -47,21 +44,6 @@ export class PermissionsService {
       }
     }
   }
-
-  //   $onInit() {
-  //     this.seedPermissions();
-  //   }
-
-  //   async seedPermissions() {
-  //     const permissions = await this.permission.find({});
-
-  //     if (permissions.length === 0) {
-  //       const promises = require("../../resources/permissions.json").map((permission: Permission) =>
-  //         this.save(permission)
-  //       );
-  //       await Promise.all(promises);
-  //     }
-  //   }
 
   async find(id: string): Promise<Permission | null> {
     const permission = await this.permission.findById(id).exec();
@@ -109,7 +91,7 @@ export class PermissionsService {
       return permission;
     }
 
-    return permission;
+    return null;
   }
 
   async remove(id: string): Promise<Permission> {

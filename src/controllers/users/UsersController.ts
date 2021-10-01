@@ -1,14 +1,27 @@
 import {
   BodyParams,
   Controller,
+  Delete,
   Get,
   HeaderParams,
+  MultipartFile,
+  Patch,
   PathParams,
+  PlatformMulterFile,
   Post,
+  Put,
   Req,
 } from "@tsed/common";
 import { Authorize } from "@tsed/passport";
-import { Description, Returns, Summary, Groups } from "@tsed/schema";
+import {
+  Description,
+  Returns,
+  Summary,
+  Groups,
+  Security,
+  Required,
+  Status,
+} from "@tsed/schema";
 import { AcceptRoles } from "src/decorators/AcceptRoles";
 import { CheckPermissions } from "src/decorators/CheckPermissions";
 import { User } from "src/models/users/User";
@@ -24,6 +37,8 @@ export class UsersController {
   ) {}
 
   @Get("/")
+  @Security("oauth_jwt")
+  @Authorize("jwt")
   @CheckPermissions("User")
   @Summary("Return all users")
   @Returns(200, User)
@@ -36,6 +51,8 @@ export class UsersController {
   }
 
   @Get("/:id")
+  @Security("oauth_jwt")
+  @Authorize("jwt")
   @CheckPermissions("User")
   @Summary("Return User based on id")
   @Returns(200, User)
@@ -54,16 +71,18 @@ export class UsersController {
   }
 
   @Post("/")
-  @AcceptRoles("admin")
+  @Security("oauth_jwt")
+  @Authorize("jwt")
+  @AcceptRoles("superadmin")
   @Summary("Create new user")
   @Returns(201, User)
   async createUser(
     @Req() request: Req,
-    @HeaderParams("authorization") token: string,
     @Description("User model")
     @BodyParams()
     @Groups("creation")
     data: User
+    // @MultipartFile("photo") photo: PlatformMulterFile
   ): Promise<User> {
     const requestUserRole = (request.user as any).role;
     if (data.role === "superadmin") {
@@ -75,7 +94,7 @@ export class UsersController {
     }
     if (
       requestUserRole === "superadmin" &&
-      ["teacher", "student"].includes(data.role) &&
+      ["staff", "student"].includes(data.role) &&
       !data.adminId
     ) {
       throw new Error("Missing field : adminId");
@@ -86,6 +105,36 @@ export class UsersController {
         data.roleId = role?._id;
       }
     }
+    // if(photo.filename) {
+    //   data.photo = photo.filename
+    // }
     return this.usersService.save(data);
+  }
+
+  @Patch("/upload-photo/:id")
+  @Security("oauth_jwt")
+  @Authorize("jwt")
+  @AcceptRoles("admin")
+  @Summary("Upload user photo")
+  @Returns(201, User)
+  async uploadDocuments(
+    @PathParams("id") @Required() id: string,
+    @MultipartFile("photo") photo: PlatformMulterFile
+  ) {
+    const user = await this.usersService.find(id);
+    if (!user) {
+      throw new Error("Unable to find user details");
+    }
+    return this.usersService.uploadPhoto(id, photo.filename);
+  }
+
+  @Delete("/:id")
+  @Security("oauth_jwt")
+  @Authorize("jwt")
+  @AcceptRoles("admin")
+  @Summary("Remove a Department")
+  @Status(204, { description: "No content" })
+  async remove(@PathParams("id") id: string): Promise<void> {
+    await this.usersService.remove(id);
   }
 }

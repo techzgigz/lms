@@ -1,11 +1,14 @@
-import { Schema, Trim } from "@tsed/mongoose";
-import { MaxLength, MinLength, Optional, Required } from "@tsed/schema";
+import { ObjectID, Schema, Trim } from "@tsed/mongoose";
+import { Groups, MaxLength, MinLength, Optional, Required } from "@tsed/schema";
 
 @Schema()
 export class Address {
-  @Optional()
+  @Groups("!creation", "!updation")
+  @ObjectID("id")
+  _id: string;
+
   @Trim()
-  name: string;
+  name?: string;
 
   @Required()
   @MinLength(5)
@@ -13,9 +16,8 @@ export class Address {
   @Trim()
   addressLine1: string;
 
-  @Optional()
   @Trim()
-  addressLine2: string;
+  addressLine2?: string;
 
   @Required()
   @Trim()
@@ -29,7 +31,6 @@ export class Address {
   @Trim()
   pincode: string;
 
-  @Optional()
   @Trim()
-  landmark: string;
+  landmark?: string;
 }

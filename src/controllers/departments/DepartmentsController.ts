@@ -14,18 +14,24 @@ import {
   Groups,
   Required,
   Returns,
+  Security,
   Status,
   Summary,
 } from "@tsed/schema";
 import { AcceptRoles } from "src/decorators/AcceptRoles";
 import { Department } from "src/models/departments/Department";
 import { DepartmentsService } from "src/services/DepartmentsService";
+import { UsersService } from "src/services/UsersService";
 
 @Controller("/departments")
 export class DepartmentsController {
-  constructor(private departmentsService: DepartmentsService) {}
+  constructor(
+    private departmentsService: DepartmentsService,
+    private usersService: UsersService
+  ) {}
 
   @Get("/")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return all Departments")
@@ -39,6 +45,7 @@ export class DepartmentsController {
   }
 
   @Get("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return Department based on id")
@@ -57,6 +64,7 @@ export class DepartmentsController {
   }
 
   @Post("/")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Create new Department")
@@ -68,29 +76,34 @@ export class DepartmentsController {
     @Groups("creation")
     data: Department
   ): Promise<Department> {
-    if (request.user) {
-      data = { ...data, createdBy: (request.user as any)._id };
+    const user = await this.usersService.find(data.createdBy.toString());
+    if (!user || user.role === "superadmin") {
+      throw new Error(
+        `User with id: ${data.createdBy} doesn't exist or is superadmin, use other role.`
+      );
     }
     return this.departmentsService.save(data, {
-      role: (request.user as any).role,
-      _id: (request.user as any)._id,
-      adminId: (request.user as any).adminId,
+      role: user.role,
+      _id: user._id,
+      adminId: user.adminId,
     });
   }
 
   @Put("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Update Department with id")
   @Status(201, { description: "Updated Department", type: Department })
   update(
     @PathParams("id") @Required() id: string,
-    @BodyParams() @Required() @Groups('updation') Department: Department
+    @BodyParams() @Groups("updation") @Required() Department: Department
   ): Promise<Department | null> {
     return this.departmentsService.update(id, Department);
   }
 
   @Delete("/:id")
+  @Security("oauth_jwt")
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Remove a Department")

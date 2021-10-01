@@ -11,37 +11,48 @@ export class AttendancesService {
   @Inject() private eventEmitter: EventEmitterService;
 
   async find(id: string): Promise<Attendance | null> {
-    const Attendance = await this.attendance.findById(id).exec();
+    const Attendance = await this.attendance
+      .findById(id)
+      .populate("student")
+      .populate("grade")
+      .populate("sections")
+      .exec();
     return Attendance;
   }
 
   async save(data: Attendance, user: EntityCreationUser): Promise<Attendance> {
-    const Attendance = new this.attendance(data);
-    await Attendance.save();
+    const attendance = new this.attendance(data);
+    await attendance.save();
     this.eventEmitter.emit("entity.created", {
       user,
       moduleName: "Attendance",
     });
-    return Attendance;
+    return attendance;
   }
 
   async update(id: string, data: Attendance): Promise<Attendance | null> {
-    const Attendance = await this.attendance.findById(id).exec();
-    if (Attendance) {
-      Attendance.student = data.student;
-      Attendance.grade = data.grade;
-      Attendance.section = data.section;
-      Attendance.text = data.text;
-      Attendance.date = data.date;
-      Attendance.status = data.status;
-      await Attendance.save();
+    const attendance = await this.attendance.findById(id).exec();
+    if (attendance) {
+      attendance.student = data.student;
+      attendance.grade = data.grade;
+      attendance.section = data.section;
+      attendance.text = data.text;
+      attendance.date = data.date;
+      attendance.status = data.status;
+      await attendance.save();
+      return attendance;
     }
-    return Attendance;
+    return null;
   }
 
   async query(options = {}): Promise<Attendance[]> {
     options = objectDefined(options);
-    return this.attendance.find(options).exec();
+    return this.attendance
+      .find(options)
+      .populate("student")
+      .populate("grade")
+      .populate("sections")
+      .exec();
   }
 
   async remove(id: string): Promise<Attendance> {
