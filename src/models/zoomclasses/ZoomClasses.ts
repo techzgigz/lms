@@ -58,7 +58,7 @@ export class ZoomClasses {
 
   @Property()
   @Required()
-  type: string;
+  type: number;
 
 
   @Property()
