@@ -26,7 +26,7 @@ import { ZoomClassesService } from "src/services/ZoomClassesService";//
 import { User } from "src/models/users/User";
 import { UsersService } from "src/services/UsersService";
 import * as jwt from "jsonwebtoken";// import * as multer from 'multer'
-import axios from 'request-promise';
+import requestPost from 'request-promise';
 
 @Controller("/zoomClasses")//
 export class ZoomClassesController {
@@ -84,23 +84,23 @@ export class ZoomClassesController {
       throw new Error(
         `User with id: ${data.createdBy} doesn't exist or is superadmin, use other role.`
       );
-    } 
-    const  YOUR_CLIENT_SECRET : any = process.env.YOUR_CLIENT_SECRET;
-    const now = Date.now(); 
-    const JWT= await jwt.sign(
+    }
+    const YOUR_CLIENT_SECRET: any = process.env.YOUR_CLIENT_SECRET;
+    const now = Date.now();
+    const JWT = await jwt.sign(
       {
-        iss: process.env.YOUR_CLIENT_ID, 
+        iss: process.env.YOUR_CLIENT_ID,
         exp: now + 3600 * 1000
       },
       YOUR_CLIENT_SECRET
     );
 
-    var options = { 
+    var options = {
       method: 'POST',
       uri: 'https://api.zoom.us/v2/users/36t77U09T7GWMGpZAwh4JQ/meetings',
       body: {
         //status: 'active',
-        host_id: data.createdBy, topic: data.classtittle, type: data.type  ,"start_time": data.classdate,
+        host_id: data.createdBy, topic: data.classtittle, type: data.type, "start_time": data.classdate,
         "duration": data.duration,
         //"schedule_for": data.createdBy,// -> uri + '?status=active'
       },
@@ -115,29 +115,27 @@ export class ZoomClassesController {
 
       }// Automatically parses the JSON string in the response
     };
-    let _this=this;
+    let _this = this;
     //
     //try {
-     await axios(options).then(function (meeting: any) {
+    return await requestPost(options).then(async function (meeting: any) {
       data.options = JSON.stringify(meeting);
-      //  return response.data;
-      //console.log(meeting)
-      return _this.zoomClassesService.save(data, {
+      return await _this.zoomClassesService.save(data, {
         role: (request.user as any).role,
         _id: (request.user as any)._id,
         adminId: (request.user as any).adminId,
       });
 
     })
-    .catch(function (err:any) {
-      // API call failed...
-      console.log('API call failed, reason ', err);
-      throw new Error(
-        `API call failed, reason `
-      );
-  });
-  // .catch (err) {
-  //    
+      .catch(function (err: any) {
+        // API call failed...
+        console.log('API call failed, reason ', err);
+        throw new Error(
+          `API call failed, reason `
+        );
+      });
+    // .catch (err) {
+    //    
   }
 
 

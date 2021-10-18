@@ -29,7 +29,6 @@
     "admin-bro": "^4.0.1",
     "ajv": "^8.6.2",
     "argon2-ffi": "^2.0.0",
-    "axios": "^0.22.0",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
@@ -48,7 +47,6 @@
     "passport-local": "^1.0.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "then-request": "^6.0.2",
     "tscpaths": "^0.0.9"
   },
   "devDependencies": {
