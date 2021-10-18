@@ -27,10 +27,24 @@ export class HomeworkClassesService {
     const homework = await this.homework.findById(id).exec();
     if (homework) {
   //  lesson.grade = data.grade;
-     homework.teacherId = data.teacherId;
-      homework.medium = data.medium;
-      homework. name = data.name;
+     homework._id = data._id;
+      homework.section = data.section;
+      homework. grade = data.grade;
+      homework.subject = data.subject;
+      homework.homeworkdate = data.homeworkdate;
+      homework.submissiondate = data.submissiondate;
+      homework.zoomclass = data.zoomclass;
+      homework.shortdescription = data.shortdescription;
+      homework.description = data.description;
+      homework.files = data.files;
+      homework.type = data.type;
+      homework.evaluate = data.evaluate;
+      homework.evaluatedate = data.evaluatedate;
+      homework.evaluateby = data.evaluateby;
+      homework.teacherid = data.teacherid;
+      homework.evaluateby = data.evaluateby;
       homework.status = data.status;
+      homework.createdBy = data.createdBy;
       await homework.save();
     }
     return homework;
