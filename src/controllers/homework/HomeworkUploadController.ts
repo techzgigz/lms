@@ -22,13 +22,13 @@ import {
   } from "@tsed/schema";
   import { AcceptRoles } from "src/decorators/AcceptRoles";
   import { HomeworkUpload } from "src/models/homework/HomeworkUpload";//
-  import { Homeworkuploadservice } from "src/services/Homeworkuploadservice";//
+  import { HomeworkUploadService } from "src/services/HomeworkUploadService";//
   import { User } from "src/models/users/User";
   import { UsersService } from "src/services/UsersService";
   
   @Controller("/homeworkupload")//
   export class HomeworkUploadController {
-    constructor(private homeworkuploadservice: HomeworkClassesService,//
+    constructor(private homeworkuploadservice: HomeworkUploadService,//
       private usersService: UsersService
       ) { }
   
@@ -99,7 +99,7 @@ import {
     @Authorize("jwt")
     @AcceptRoles("admin")
     @Summary("Update homeworkupload with id")
-    @Status(201, { description: "Updated homeworkupload", type: homeworkuploadservice})
+    @Status(201, { description: "Updated homeworkupload", type: HomeworkUploadService})
     update(
       @PathParams("id") @Required() id: string,
       @BodyParams() @Groups("updation") @Required() HomeworkUpload: HomeworkUpload

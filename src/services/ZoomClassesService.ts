@@ -25,7 +25,6 @@ export class ZoomClassesService {
   async update(id: string, data: ZoomClasses): Promise<ZoomClasses | null> {
     const zoomclass = await this.zoomclasses.findById(id).exec();
     if (zoomclass) {
-      //  lesson.grade = data.grade;
       zoomclass.section = data.section;
       zoomclass.grade = data.grade;
       zoomclass.classtittle = data.classtittle;
