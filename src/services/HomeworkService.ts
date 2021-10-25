@@ -1,18 +1,18 @@
 import { Service, Inject } from "@tsed/common";
 import { EventEmitterService } from "@tsed/event-emitter";
 import { MongooseModel } from "@tsed/mongoose";
-import { Homework } from "src/models/syllabus/Homework";
+import { Homework } from "src/models/homework/Homework";
 import { objectDefined } from "src/utils";
 import { EntityCreationUser } from "./PermissionsService";
 
 @Service()
-export class HomeworkClassesService {
+export class HomeworkService {
   @Inject(Homework
-    ) private Homework: MongooseModel<Homework>;
+    ) private homework: MongooseModel<Homework>;
   @Inject() private eventEmitter: EventEmitterService;
 
   async find(id: string): Promise<Homework | null> {
-    const Homework = await this.homework.findById(id).populate("medium").populate("subject").populate("grade").exec();
+    const Homework = await this.homework.findById(id).populate("section").populate("subject").populate("grade").exec();
     return Homework;
   }
 

@@ -22,11 +22,9 @@ import {
   } from "@tsed/schema";
   import { AcceptRoles } from "src/decorators/AcceptRoles";
   import { HomeworkUpload } from "src/models/homework/HomeworkUpload";//
-  import { HomeworkClassesService } from "src/services/HomeworkClassesService";//
+  import { Homeworkuploadservice } from "src/services/Homeworkuploadservice";//
   import { User } from "src/models/users/User";
   import { UsersService } from "src/services/UsersService";
-  import * as multer from 'multer'
-import { homeworkuploadservice } from "src/services/HomeworkUploadService";
   
   @Controller("/homeworkupload")//
   export class HomeworkUploadController {
@@ -58,7 +56,7 @@ import { homeworkuploadservice } from "src/services/HomeworkUploadService";
     ): Promise<HomeworkUpload | null> {
       if (
         (request.user as any).role !== "superadmin" &&
-        !request.permissions?.readIds.includes(id)
+        !request.permissions.readIds.includes(id)
       ) {
         throw new Error("You don't have sufficient permissions");
       }

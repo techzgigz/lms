@@ -6,7 +6,7 @@ import { objectDefined } from "src/utils";
 import { EntityCreationUser } from "./PermissionsService";
 
 @Service()
-export class homeworkuploadservice {
+export class Homeworkuploadservice {
   @Inject(HomeworkUpload) private homeworkupload: MongooseModel<HomeworkUpload>;
   @Inject() private eventEmitter: EventEmitterService;
 
@@ -20,8 +20,8 @@ export class homeworkuploadservice {
     await homeworkupload.save();
     this.eventEmitter.emit("entity.created", { user, moduleName: "HomeworkUpload" });
     return homeworkupload;
-  }.
-
+  }
+  
   async update(id: string, data: HomeworkUpload): Promise<HomeworkUpload | null> {
     const homeworkupload = await this.homeworkupload.findById(id).exec();
     if (homeworkupload) {
@@ -43,7 +43,7 @@ export class homeworkuploadservice {
 
   async query(options = {}): Promise<HomeworkUpload[]> {
     options = objectDefined(options);
-    return this.homeworkupload.find(options).populate("homework")exec();
+    return this.homeworkupload.find(options).populate("homework").exec();
   }
 
   async remove(id: string): Promise<HomeworkUpload> {

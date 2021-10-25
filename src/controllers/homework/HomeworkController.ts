@@ -25,12 +25,10 @@ import {
   import { HomeworkService } from "src/services/HomeworkService";//
   import { User } from "src/models/users/User";
   import { UsersService } from "src/services/UsersService";
-  import * as multer from 'multer'
-import { homeworkservice } from "src/services/homeworkservice";
   
   @Controller("/Homework")//
   export class HomeworkController {
-    constructor(private homeworkservice: homeworkservice,//
+    constructor(private homeworkservice: HomeworkService,//
       private usersService: UsersService
       ) { }
   
@@ -101,12 +99,12 @@ import { homeworkservice } from "src/services/homeworkservice";
     @Authorize("jwt")
     @AcceptRoles("admin")
     @Summary("Update homework with id")
-    @Status(201, { description: "Updated Homework", type: Homeworkservice})
+    @Status(201, { description: "Updated Homework", type: HomeworkService})
     update(
       @PathParams("id") @Required() id: string,
       @BodyParams() @Groups("updation") @Required() Homework: Homework
-    ): Promise<HomeworkEVL| null> {
-      return this.homeworkEVLservice.update(id, Homework);
+    ): Promise<Homework| null> {
+      return this.homeworkservice.update(id, Homework);
     }
   
     @Delete("/:id")
