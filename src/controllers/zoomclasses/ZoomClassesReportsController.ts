@@ -21,8 +21,8 @@ import {
 
 } from "@tsed/schema";
 import { AcceptRoles } from "src/decorators/AcceptRoles";
-import { Zoomclassesreports } from "src/models/Zoomclasses/ZoomClassesReports";//
-import { ZoomClassesReportsService } from "src/services/ZoomClassesReportsService";//
+import { ZoomclassesReports } from "src/models/Zoomclasses/ZoomClassesReport";//
+import { ZoomClassesReportService } from "src/services/ZoomClassesReportsService";//
 import { User } from "src/models/users/User";
 import { UsersService } from "src/services/UsersService";
 import * as jwt from "jsonwebtoken";// import * as multer from 'multer'
@@ -30,7 +30,7 @@ import axios from 'request-promise';
 
 @Controller("/ZoomClassesReports")//
 export class ZoomClassesReportsController {
-  constructor(private ZoomClassesReportsService: ZoomClassesReportsService,//
+  constructor(private ZoomClassesReportsService: ZoomClassesReportService,//
     private usersService: UsersService
   ) { }
 
@@ -38,8 +38,8 @@ export class ZoomClassesReportsController {
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return all Zoomclassesreports")
-  @Returns(200, ZoomClassesReports)
-  async getAllZoomClassesReports(@Req() request: Req): Promise<ZoomClassesReports[]> {
+  @Returns(200, ZoomClassesReport)
+  async getAllZoomClassesReports(@Req() request: Req): Promise<ZoomClassesReport[]> {
     let query = {};
     if ((request.user as any).role !== "superadmin") {
       query = { _id: request.permissions.readIds };
@@ -51,11 +51,11 @@ export class ZoomClassesReportsController {
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Return Zoomclassesreports based on id")
-  @Returns(200, ZoomClassesReports)
+  @Returns(200, ZoomClassesReport)
   async getZoomClassesReports(
     @PathParams("id") id: string,
     @Req() request: Req
-  ): Promise<ZoomClassesReports | null> {
+  ): Promise<ZoomClassesReport | null> {
     if (
       (request.user as any).role !== "superadmin" &&
       !request.permissions.readIds.includes(id)
@@ -70,14 +70,14 @@ export class ZoomClassesReportsController {
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Create new ZoomClassesReports")
-  @Returns(201, ZoomClassesReports)
-  async createZoomClassesReports(
+  @Returns(201, ZoomClassesReport)
+  async createZoomClassesReport(
     @Req() request: Req,
-    @Description("ZoomClassesReports model")
+    @Description("ZoomClassesReport model")
     @BodyParams()
     @Groups("creation")
-    data: ZoomClassesReports
-  ): Promise<ZoomClassesReports> {
+    data: ZoomClassesReport
+  ): Promise<ZoomClassesReport> {
 
     const user = await this.usersService.find(data.createdBy.toString());
     if (!user) {
@@ -147,12 +147,12 @@ export class ZoomClassesReportsController {
   @Authorize("jwt")
   @AcceptRoles("admin")
   @Summary("Update ZoomClassesReports with id")
-  @Status(201, { description: "Updated ZoomClassesReports", type:ZoomClassesReports })
+  @Status(201, { description: "Updated ZoomClassesReports", type:ZoomClassesReport })
   update(
     @PathParams("id") @Required() id: string,
-    @BodyParams() @Groups("updation") @Required() ZoomClassesReports: ZoomClassesReports
-  ): Promise<Zoomclassesreports | null> {
-    return this.ZoomClassesReports.update(id, ZoomClassesReports);
+    @BodyParams() @Groups("updation") @Required() ZoomClassesReports: ZoomClassesReport
+  ): Promise<Zoomclassesreport | null> {
+    return this.ZoomClassesReport.update(id, ZoomClassesReports);
   }
 
   @Delete("/:id")
