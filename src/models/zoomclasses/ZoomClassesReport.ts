@@ -14,6 +14,7 @@ import { Grade} from "../grades/Grades";
 import {Subject} from "../subjects/Subject"
 import { User } from "../users/User";
 import { Section } from "../sections/Section";
+import { ZoomClasses } from "./ZoomClasses";
 
 
 @Model({ schemaOptions: { timestamps: true } })
