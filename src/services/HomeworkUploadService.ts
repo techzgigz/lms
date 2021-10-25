@@ -6,7 +6,7 @@ import { objectDefined } from "src/utils";
 import { EntityCreationUser } from "./PermissionsService";
 
 @Service()
-export class HomeworkuploadService {
+export class HomeworkUploadService {
   @Inject(HomeworkUpload) private homeworkupload: MongooseModel<HomeworkUpload>;
   @Inject() private eventEmitter: EventEmitterService;
 
