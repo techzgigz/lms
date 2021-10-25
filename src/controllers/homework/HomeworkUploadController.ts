@@ -22,7 +22,7 @@ import {
   } from "@tsed/schema";
   import { AcceptRoles } from "src/decorators/AcceptRoles";
   import { HomeworkUpload } from "src/models/homework/HomeworkUpload";//
-  import { HomeworkUploadService } from "src/services/HomeworkUploadService";//
+  import { HomeworkuploadService } from "src/services/HomeworkUploadService";//
   import { User } from "src/models/users/User";
   import { UsersService } from "src/services/UsersService";
   
