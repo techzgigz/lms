@@ -28,7 +28,7 @@ import { UsersService } from "src/services/UsersService";
 import * as jwt from "jsonwebtoken";// import * as multer from 'multer'
 import requestPost from 'request-promise';
 
-@Controller("/zoomClasses")//
+@Controller("/zoomClasses")// 
 export class ZoomClassesController {
   constructor(private zoomClassesService: ZoomClassesService,//
     private usersService: UsersService
@@ -97,7 +97,7 @@ export class ZoomClassesController {
 
     var options = {
       method: 'POST',
-      uri: 'https://api.zoom.us/v2/users/36t77U09T7GWMGpZAwh4JQ/meetings',
+      uri: process.env.ZOOM_API + '36t77U09T7GWMGpZAwh4JQ/meetings',
       body: {
         //status: 'active',
         host_id: data.createdBy, topic: data.classtittle, type: data.type, "start_time": data.classdate,
@@ -124,7 +124,7 @@ export class ZoomClassesController {
         role: (request.user as any).role,
         _id: (request.user as any)._id,
         adminId: (request.user as any).adminId,
-      });
+      }); 
 
     })
       .catch(function (err: any) {
