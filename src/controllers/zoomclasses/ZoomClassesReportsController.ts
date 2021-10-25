@@ -79,21 +79,23 @@ export class ZoomClassesReportsController {
   ): Promise<ZoomClassesReport> {
 
     const user = await this.usersService.find(data.createdBy.toString());
-    if (!user)  role: (request.user as any).role,
-    _id: (request.user as any)._id,
-    adminId: (request.user as any).adminId,
-  });{
+    if (user) {
       throw new Error(
         `User with id: ${data.createdBy} doesn't exist or is superadmin, use other role.`
       );
-    } 
-    
-  @Status(201, { description: "Updated ZoomClassesReports", type:ZoomClassesReport })
+    }
+    return this.ZoomClassesReportsService.save(data, {
+      role: (request.user as any).role,
+      _id: (request.user as any)._id,
+      adminId: (request.user as any).adminId,
+    });
+  }
+  @Status(201, { description: "Updated ZoomClassesReports", type: ZoomClassesReport })
   update(
     @PathParams("id") @Required() id: string,
     @BodyParams() @Groups("updation") @Required() ZoomClassesReports: ZoomClassesReport
-  ): Promise<Zoomclassesreport | null> {
-    return this.ZoomClassesReport.update(id, ZoomClassesReports);
+  ): Promise<ZoomClassesReport | null> {
+    return this.ZoomClassesReportService.update(id, ZoomClassesReports);
   }
 
   @Delete("/:id")
