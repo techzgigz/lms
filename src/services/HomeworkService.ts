@@ -52,7 +52,7 @@ export class HomeworkService {
 
   async query(options = {}): Promise<Homework[]> {
     options = objectDefined(options);
-    return this.homework.find(options).populate("medium").populate("subject").populate("grade").exec();
+    return this.homework.find(options).populate("section").populate("subject").populate("grade").exec();
   }
 
   async remove(id: string): Promise<Homework> {
