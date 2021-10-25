@@ -21,14 +21,14 @@ import {
 
 } from "@tsed/schema";
 import { AcceptRoles } from "src/decorators/AcceptRoles";
-import { ZoomclassesReports } from "src/models/Zoomclasses/ZoomClassesReport";//
+import { ZoomclassesReport } from "src/models/Zoomclasses/ZoomClassesReport";//
 import { ZoomClassesReportService } from "src/services/ZoomClassesReportsService";//
 import { User } from "src/models/users/User";
 import { UsersService } from "src/services/UsersService";
 import * as jwt from "jsonwebtoken";// import * as multer from 'multer'
 import axios from 'request-promise';
 
-@Controller("/ZoomClassesReports")//
+@Controller("/ZoomClassesReport")//
 export class ZoomClassesReportsController {
   constructor(private ZoomClassesReportsService: ZoomClassesReportService,//
     private usersService: UsersService
@@ -39,7 +39,7 @@ export class ZoomClassesReportsController {
   @AcceptRoles("admin")
   @Summary("Return all Zoomclassesreports")
   @Returns(200, ZoomClassesReport)
-  async getAllZoomClassesReports(@Req() request: Req): Promise<ZoomClassesReport[]> {
+  async getAllZoomClassesReport(@Req() request: Req): Promise<ZoomClassesReport[]> {
     let query = {};
     if ((request.user as any).role !== "superadmin") {
       query = { _id: request.permissions.readIds };
