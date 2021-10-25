@@ -1,46 +1,55 @@
 import { Service, Inject } from "@tsed/common";
 import { EventEmitterService } from "@tsed/event-emitter";
 import { MongooseModel } from "@tsed/mongoose";
-import { ZoomClassesReports } from "src/models/ZoomClasses/ZoomClassesReports";
+import { ZoomClassesReport } from "src/models/ZoomClasses/ZoomClassesReport";
 import { objectDefined } from "src/utils";
 import { EntityCreationUser } from "./PermissionsService";
 
 @Service()
-export class ZoomClassesReportsService {
-  @Inject(ZoomClassesReports) private zoomClassesReports: MongooseModel<ZoomClassesReports>;
+export class ZoomClassesReportService {
+  @Inject(ZoomClassesReport) private zoomClassesReports: MongooseModel<ZoomClassesReport>;
   @Inject() private eventEmitter: EventEmitterService;
 
-  async find(id: string): Promise<ZoomClassesReports | null> {
+  async find(id: string): Promise<ZoomClassesReport | null> {
     const zoomclass = await this.zoomClassesReports.findById(id).populate("section").populate("grade").exec();
-    return ZoomClassesReports;
+    return ZoomClassesReport;
   }
 
-  async save(data: ZoomClassesReports, user: EntityCreationUser): Promise<ZoomClassesReports> {
+  async save(data: ZoomClassesReport, user: EntityCreationUser): Promise<ZoomClassesReport> {
     const zoomClassesReports = new this.zoomClassesReports(data);
     await zoomClassesReports.save();
     this.eventEmitter.emit("entity.created", { user, moduleName: "ZoomClasses" });
     return zoomClassesReports;
   }
 
-  async update(id: string, data: ZoomClassesReports): Promise<ZoomClassesReports | null> {
+  async update(id: string, data: ZoomClassesReport): Promise<ZoomClassesReport | null> {
     const zoomClassesReports = await this.zoomClassesReports.findById(id).exec();
     if (zoomClassesReports) {
       //  lesson.grade = data.grade;
-      ZoomClassesReports.section = data.section;
-      ZoomClassesReports.grade = data.grade;
-      ZoomClassesReports.classtittle = data.classtittle;
-      ZoomClassesReports.classdate = data.classdate;
-      ZoomClassesReports.role = data.role;
-      ZoomClassesReports.duration = data.duration;
-      ZoomClassesReports.description = data.description;
+      ZoomClassesReport.section = data.section;
+      ZoomClassesReport.grade = data.grade;
+      ZoomClassesReport.classtittle = data.classtittle;
+      ZoomClassesReport.classdate = data.classdate;
+      ZoomClassesReport.role = data.role;
+      ZoomClassesReport.duration = data.duration;
+      ZoomClassesReport.description = data.description;
       // zoomclass.  options=data.options;
-      ZoomClassesReports.type = data.type;
+      ZoomClassesReport.type = data.type;
 
 
-      ZoomClassesReports.status = data.status;
-      await ZoomClassesReports.save();
+      ZoomClassesReport.status = data.status;
+      await ZoomClassesReport.save();
     }
-    return ZoomClassesReports;
+    return ZoomClassesReport;
   }
 
-  async query(options = {}): Promise<ZoomClassesReports[]> {
+  async query(options = {}): Promise<ZoomClassesReport[]> {
+    options = objectDefined(options);
+    return this.zoomClassesReports.find(options).populate("section").populate("grade").exec();
+  }
+
+  async remove(id: string): Promise<ZoomClassesReport> {
+    return await this.zoomClassesReports.findById(id).remove().exec();
+  }
+}
+
